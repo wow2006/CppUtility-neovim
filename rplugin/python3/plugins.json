@@ -1,0 +1,17 @@
+{
+  "clang-tidy": {
+    "pipeline": ["command1"],
+    "command1": ["clang-tidy -format-style=file -p {0} -checks='{1}' {2} {3}", ".", "readability-*", "{options}", "{current_file}"]
+  },
+  "pvs-studio": {
+    "pipeline": ["analysis", "generate"],
+    "analysis": ["pvs-studio-analyzer analyze"],
+    "generate": ["plog-converter -a {0} -t errorfile PVS-Studio.log", ""]
+  },
+  "oclint": {
+    "pipeline": ["oclint -p {0} {1}", "", ""]
+  },
+  "cppcheck": {
+    "pipeline": ["cppcheck -q --language=c++ --project={0} --enable=style {1}", "compile_commands.json", "{current_file"]
+  }
+}
