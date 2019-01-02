@@ -1,4 +1,4 @@
-import os, sys, copy
+import os, sys, copy, re
 import json
 import neovim
 import tempfile
@@ -21,6 +21,44 @@ class Main(object):
 
     def __del__(self):
         remove(self.temp_file)
+
+    @neovim.command('CppCheck', range='', nargs='*')
+    def analysisCppCheck(self, args, nargs='*'):
+        current_file_name = self.vim.current.buffer.name
+
+        if not current_file_name:
+            self.vim.err_write("select cpp file")
+            return
+
+        pvs_studio_commands = copy.deepcopy(self.commands["cppcheck"])
+
+        command_key  = pvs_studio_commands["pipeline"][0]
+        command_args = pvs_studio_commands[command_key]
+
+        command_args[-1] = current_file_name
+
+        command = command_args[0].format(*command_args[1:])
+
+        result = self.runCommand(command)
+
+        if not result:
+            self.vim.out_write("Result is None")
+            return
+
+        errors = result.stderr.decode("utf-8").split('\n')
+
+        errors_buffer = []
+
+        for error in errors:
+            if error:
+                group = re.search(r"\[(.*?)\]", error)
+                info  = error.split(":")[-1]
+                f,l = group[1].split(":")
+                errors_buffer.append("{0}:{1}:0: {2}\n".format(f, l, info))
+
+        errors = "\n".join(errors_buffer)
+
+        self.writeToQuickFix(errors, current_file_name)
 
     @neovim.command('PVS', range='', nargs='*')
     def analysisPVS(self, args, nargs='*'):
