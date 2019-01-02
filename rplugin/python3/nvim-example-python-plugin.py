@@ -22,9 +22,39 @@ class Main(object):
     def __del__(self):
         remove(self.temp_file)
 
-    @neovim.function('DoItPython')
-    def doItPython(self, args):
-        self.vim.command('echo "hello"')
+    @neovim.command('PVS', range='', nargs='*')
+    def analysisPVS(self, args, nargs='*'):
+        current_file_name = self.vim.current.buffer.name
+
+        if not current_file_name:
+            self.vim.err_write("select cpp file")
+            return
+
+        pvs_studio_commands = copy.deepcopy(self.commands["pvs-studio"])
+
+        pvs_analysis_key = pvs_studio_commands["pipeline"][0]
+        pvs_analysis = pvs_studio_commands[pvs_analysis_key]
+        
+        result = self.runCommand(pvs_analysis)
+
+        if not result:
+            self.vim.err_write("error at {}\n".format(pvs_analysis))
+            return
+        
+        pvs_generate_key = pvs_studio_commands["pipeline"][1]
+        pvs_generate     = pvs_studio_commands[pvs_generate_key][0]
+
+        result = self.runCommand(pvs_generate.format("GA:1,2,3"))
+
+        if not result:
+            self.vim.err_write("error at {}\n".format(pvs_generate))
+            return
+
+        result = result.stdout.decode("utf-8").split('\n')
+
+        errors = "\n".join([x for x in result if current_file_name in x])
+
+        self.writeToQuickFix(errors, current_file_name)
 
     @neovim.command('Tidy', range='', nargs='*')
     def analysisTidy(self, args, nargs='*'):
