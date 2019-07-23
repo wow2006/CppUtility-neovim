@@ -12,9 +12,11 @@ from os.path import dirname, exists, isdir, join, abspath
 class Main(object):
     def __init__(self, vim):
         self.vim = vim
-        self.temp_file = join(tempfile.gettempdir(), tempfile.gettempprefix() + "_analysis")
+        self.temp_file = join(tempfile.gettempdir(),
+                              tempfile.gettempprefix() + "_analysis")
         self.build_dir = ''
-        json_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plugins.json")
+        json_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "plugins.json")
 
         with open(json_file, "r") as f:
             self.commands = json.load(f)
@@ -32,7 +34,7 @@ class Main(object):
 
         pvs_studio_commands = copy.deepcopy(self.commands["cppcheck"])
 
-        command_key  = pvs_studio_commands["pipeline"][0]
+        command_key = pvs_studio_commands["pipeline"][0]
         command_args = pvs_studio_commands[command_key]
 
         command_args[-1] = current_file_name
@@ -52,8 +54,8 @@ class Main(object):
         for error in errors:
             if error:
                 group = re.search(r"\[(.*?)\]", error)
-                info  = error.split(":")[-1]
-                f,l = group[1].split(":")
+                info = error.split(":")[-1]
+                f, l = group[1].split(":")
                 errors_buffer.append("{0}:{1}:0: {2}\n".format(f, l, info))
 
         errors = "\n".join(errors_buffer)
@@ -72,15 +74,15 @@ class Main(object):
 
         pvs_analysis_key = pvs_studio_commands["pipeline"][0]
         pvs_analysis = pvs_studio_commands[pvs_analysis_key]
-        
+
         result = self.runCommand(pvs_analysis)
 
         if not result:
             self.vim.err_write("error at {}\n".format(pvs_analysis))
             return
-        
+
         pvs_generate_key = pvs_studio_commands["pipeline"][1]
-        pvs_generate     = pvs_studio_commands[pvs_generate_key][0]
+        pvs_generate = pvs_studio_commands[pvs_generate_key][0]
 
         result = self.runCommand(pvs_generate.format("GA:1,2,3"))
 
@@ -102,38 +104,38 @@ class Main(object):
         else:
             self.readTidy(*args)
 
-    @neovim.command('ReadabilityTidy', range='', nargs='*')
+    @neovim.command('TidyReadability', range='', nargs='*')
     def TidyReadability(self, args, nargs='*'):
         self.analysisTidy('readability-*')
 
-    @neovim.command('ReadabilityTidyFix', range='', nargs='*')
+    @neovim.command('TidyReadabilityFix', range='', nargs='*')
     def TidyReadabilityFix(self, args, nargs='*'):
         self.analysisTidy(['readability-*', '-fix'])
 
-    @neovim.command('ModernizeTidy', range='', nargs='*')
+    @neovim.command('TidyModernize', range='', nargs='*')
     def TidyModernize(self, args, nargs='*'):
         self.analysisTidy('modernize-*')
 
-    @neovim.command('PortabilityTidy', range='', nargs='*')
+    @neovim.command('TidyPortability', range='', nargs='*')
     def TidyPortability(self, args, nargs='*'):
         self.analysisTidy('portability-*')
 
-    @neovim.command('PerformanceTidy', range='', nargs='*')
+    @neovim.command('TidyPerformance', range='', nargs='*')
     def TidyPerformance(self, args, nargs='*'):
         self.analysisTidy('performance-*')
 
-    @neovim.command('CppCoreGuidelinesTidy', range='', nargs='*')
+    @neovim.command('TidyCppCoreGuidelines', range='', nargs='*')
     def TidyCppCoreGuidelines(self, args, nargs='*'):
         self.analysisTidy('cppcoreguidelines-*')
 
-    @neovim.command('ClangAnalyzerTidy', range='', nargs='*')
+    @neovim.command('TidyClangAnalyzer', range='', nargs='*')
     def TidyClangAnalyzer(self, args, nargs='*'):
         self.analysisTidy('clang-analyzer-*')
 
     def readTidy(self, analysisFilter, fix_file=None):
         current_file = self.vim.current.buffer.name
 
-        if(not current_file):
+        if (not current_file):
             return
 
         tidy_info = copy.deepcopy(self.commands["clang-tidy"])
@@ -174,21 +176,21 @@ class Main(object):
         self.vim.out_write("{}\n".format(command))
         try:
             result = subprocess.run(command,
-                                    shell=True, check=True,
+                                    shell=True,
+                                    check=True,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
 
-            if(result.returncode in [0, 1]):
+            if (result.returncode in [0, 1]):
                 return result
 
-            self.vim.err_write("ERROR at {}:\n{}\n{}".format(result.args,
-                               result.stderr.decode("utf-8"),
-                               result.stdout.decode("utf-8")))
+            self.vim.err_write("ERROR at {}:\n{}\n{}".format(
+                result.args, result.stderr.decode("utf-8"),
+                result.stdout.decode("utf-8")))
 
             return None
         except subprocess.CalledProcessError as e:
             self.vim.out_write("ERROR ----")
-            #self.vim.err_write(e.output)
 
     def writeToQuickFix(self, error_string, current_file):
         errors_string = error_string.split('\n')
