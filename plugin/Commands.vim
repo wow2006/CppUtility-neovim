@@ -21,3 +21,10 @@ function! s:ToggleQf()
 
   copen
 endfunction
+
+let s:compile_commands=execute(":pwd") . "/compile_commands.json"
+call writefile([s:compile_commands], "/home/ahussein/test")
+if filereadable(s:compile_commands)
+  echo "SpecificFile exists"
+endif
+

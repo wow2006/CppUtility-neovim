@@ -9,7 +9,7 @@ from os.path import dirname, exists, isdir, join, abspath
 
 
 @neovim.plugin
-class Main(object):
+class StaitcAnalysis(object):
     def __init__(self, vim):
         self.vim = vim
         self.temp_file = join(tempfile.gettempdir(),
@@ -190,7 +190,7 @@ class Main(object):
 
             return None
         except subprocess.CalledProcessError as e:
-            self.vim.out_write("ERROR ----")
+            self.vim.out_write("ERROR ----" + e)
 
     def writeToQuickFix(self, error_string, current_file):
         errors_string = error_string.split('\n')
