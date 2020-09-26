@@ -3,6 +3,7 @@ import pynvim
 import subprocess
 from os import path
 
+
 # TODO:
 # 1. Detect build directory.
 # 2. Run build command.
@@ -13,7 +14,7 @@ class Building:
         self.vim           = vim
         self.build_dir     = None
         self.build_command = None
-    
+
     def get_building_dir(self):
         index = 0
         found = False
@@ -26,7 +27,7 @@ class Building:
                 found = True
             index += 1
             curret_dir = path.abspath(path.join(path.curdir, ".."))
-        
+
         if(found):
             self.build_dir = path.dirname(path.realpath(compile_commands))
             self.vim.out_write(self.build_dir + "\n")
@@ -51,7 +52,7 @@ class Building:
         if not self.build_command:
             self.vim.err_write("Can not find build command?!\n")
             return
-        
+
         self.runCommand(self.build_command)
 
     def runCommand(self, command):
@@ -67,7 +68,6 @@ class Building:
                 copen_file = '/tmp/test.txt'
                 self.write_erros(result.stdout, copen_file)
                 self.write_to_quick_fix(copen_file)
-
         except subprocess.CalledProcessError as e:
             self.vim.out_write("ERROR ----\n")
 
@@ -88,3 +88,4 @@ class Building:
         # open errors in cerror
         self.vim.command(f"cfile {errors_file}")
         self.vim.command("copen")
+

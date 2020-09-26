@@ -1,6 +1,5 @@
 " make
-map <F4> :let &makeprg="cd ../build/Release/CLang && ninja"
-map <F5> :make<CR>
+map <F5> :Build<CR>
 map <F6> :call <SID>ToggleQf()<cr>
 
 function! s:CloseQF()
@@ -21,10 +20,4 @@ function! s:ToggleQf()
 
   copen
 endfunction
-
-let s:compile_commands=execute(":pwd") . "/compile_commands.json"
-call writefile([s:compile_commands], "/home/ahussein/test")
-if filereadable(s:compile_commands)
-  echo "SpecificFile exists"
-endif
 

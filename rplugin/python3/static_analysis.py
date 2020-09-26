@@ -209,4 +209,3 @@ class StaitcAnalysis(object):
         # open errors in cerror
         self.vim.command("cfile %s" % self.temp_file)
         self.vim.command("copen")
-
