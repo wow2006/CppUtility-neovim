@@ -5,8 +5,8 @@ from os import path
 
 
 # TODO:
-# 1. Detect build directory.
-# 2. Run build command.
+# 1. Detect build directory. [DONE]
+# 2. Run build command. [DONE]
 # 3. Make list of build directories. ie. {CLang,GNU}, {Release,Debug}
 @pynvim.plugin
 class Building:
@@ -38,7 +38,7 @@ class Building:
         elif path.exists(path.join(self.build_dir, "build.ninja")):
             self.build_command = "Makefile"
 
-    @pynvim.autocmd('BufEnter', pattern='*.cpp', sync=True)
+    @pynvim.autocmd('VimEnter', pattern='*.cpp', sync=True)
     def setBuild(self):
         self.get_building_dir()
 
